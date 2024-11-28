@@ -1,0 +1,35 @@
+
+This Python script monitors an inverter's status, fetches live data, and stores it in a CSV file. It allows you to configure the inverter's IP address, user credentials, polling interval, and timeout. Additionally, it can work both with and without a graphical user interface (GUI), allowing for flexibility in how the tool is run.
+
+## Features
+
+- **Live Data Display**: Displays the current power (W), today's energy (kWh), and total energy (kWh) in a GUI.
+- **Polling**: Fetches data from the inverter at regular intervals (defined in minutes) and saves it in a CSV file.
+- **CSV Output**: Saves the data to a CSV file with `;` as the delimiter. The file includes:
+  - Timestamp
+  - Current power (W)
+  - Today's energy usage (kWh)
+  - Total energy usage (kWh)
+- **Configuration**: Settings like username, password, inverter IP address, polling interval, and timeout are saved in a configuration file (`settings.ini`).
+- **Polling Status**: A status indicator is shown in green when polling is active and red when it's disabled.
+
+## Usage
+
+### Running the Program with GUI
+
+By default, when you run the program, it will start a graphical user interface (GUI) where you can input the inverter settings and start polling.
+
+1. **Set Up the Inverter**: Enter the username, password, and IP address of your inverter in the GUI.
+2. **Configure Polling Interval**: Specify the polling interval in minutes.
+3. **Choose CSV Location**: You can specify where the CSV file will be saved.
+4. **Start Polling**: Click "Start Polling" to begin fetching and saving the data.
+5. **Save Settings**: You can save the current settings for the next run by clicking "Save Settings".
+
+### Running the Program Without GUI (Using the `--pst` Parameter)
+
+You can also run the program without the GUI by using the `--pst` parameter. This is useful for running the tool in a headless environment or when you want to start polling immediately from the command line.
+
+**Example Command:**
+```bash
+python3 cloudlessdeye.py --pst
+
