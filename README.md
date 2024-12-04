@@ -1,6 +1,6 @@
 CloudlessDeye - Early Alpha (Use at Your Own Risk!)
 
-Welcome to CloudlessDeye, the slightly experimental tool that grabs data from your Deye solar inverter via its web interface and spits it out into a neat CSV file. Think of it as a way to track your solar power without the cloud, because who needs that pesky internet when you can keep things simple?
+Welcome to CloudlessDeye, the slightly experimental tool that grabs data from your Deye(DEYE SUN600G3-EU-230) solar inverter via its web interface and spits it out into a neat CSV file. Think of it as a way to track your solar power without the cloud, because who needs that pesky internet when you can keep things simple?
 
 Features (or Things It Might Do):
 
