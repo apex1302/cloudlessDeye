@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV-Datenanzeige</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js einbinden -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+        }
+        p {
+            font-size: 1.1em;
+        }
+        .chart-container {
+            margin-top: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Letzte Messung: <span id="zeit">-</span></h1>
+    <p><strong>Wechselrichter 1 - Aktuelle Leistung (W):</strong> <span id="leistung1">-</span></p>
+    <p><strong>Wechselrichter 1 - Erzeugte Energie (kWh):</strong> <span id="energie1">-</span></p>
+    <p><strong>Wechselrichter 2 - Aktuelle Leistung (W):</strong> <span id="leistung2">-</span></p>
+    <p><strong>Wechselrichter 2 - Erzeugte Energie (kWh):</strong> <span id="energie2">-</span></p>
+    <p><strong>Wechselrichter 3 - Aktuelle Leistung (W):</strong> <span id="leistung3">-</span></p>
+    <p><strong>Wechselrichter 3 - Erzeugte Energie (kWh):</strong> <span id="energie3">-</span></p>
+
+    <!-- Container für das Diagramm -->
+    <div class="chart-container">
+        <h2>Leistungsverlauf der letzten Tage</h2>
+        <canvas id="leistungChart"></canvas>
+    </div>
+
+    <script>
+        async function fetchCSV() {
+            try {
+                const response = await fetch('data.csv'); // CSV-Datei laden
+                const text = await response.text();       // Inhalt als Text lesen
+                const lines = text.trim().split('\n');    // Zeilen aufteilen
+
+                const data = []; // Array für Diagrammdaten
+                const labels = []; // Array für Zeitstempel
+                const now = new Date();
+
+                // Datenverarbeitung
+                lines.forEach(line => {
+                    const values = line.split(';');
+                    const time = new Date(values[0]);
+                    
+                    // Nur Werte aus den letzten 30 Tagen verwenden
+                    if ((now - time) / (1000 * 60 * 60 * 24) <= 30) {
+                        labels.push(values[0]); // Zeitstempel
+                        data.push({
+                            time: values[0],         // Zeit
+                            leistung1: parseFloat(values[1]), // Leistung WR1
+                            leistung2: parseFloat(values[4]), // Leistung WR2
+                            leistung3: parseFloat(values[7])  // Leistung WR3
+                        });
+                    }
+                });
+
+                if (data.length > 0) {
+                    // Letzte Zeile auslesen und Anzeigen aktualisieren
+                    const last = data[data.length - 1];
+                    document.getElementById('zeit').textContent = last.time;
+                    document.getElementById('leistung1').textContent = last.leistung1;
+                    document.getElementById('energie1').textContent = lines[lines.length - 1].split(';')[3];
+                    document.getElementById('leistung2').textContent = last.leistung2;
+                    document.getElementById('energie2').textContent = lines[lines.length - 1].split(';')[6];
+                    document.getElementById('leistung3').textContent = last.leistung3;
+                    document.getElementById('energie3').textContent = lines[lines.length - 1].split(';')[9];
+                }
+
+                // Diagramm erstellen
+                createChart(labels, data.map(d => d.leistung1), data.map(d => d.leistung2), data.map(d => d.leistung3));
+            } catch (error) {
+                console.error('Fehler beim Laden der CSV-Datei:', error);
+            }
+        }
+
+        function createChart(labels, leistung1, leistung2, leistung3) {
+            const ctx = document.getElementById('leistungChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels, // Zeitstempel auf der x-Achse
+                    datasets: [
+                        {
+                            label: 'Wechselrichter 1 - Leistung (W)',
+                            data: leistung1,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Wechselrichter 2 - Leistung (W)',
+                            data: leistung2,
+                            borderColor: 'rgba(192, 75, 75, 1)',
+                            backgroundColor: 'rgba(192, 75, 75, 0.2)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Wechselrichter 3 - Leistung (W)',
+                            data: leistung3,
+                            borderColor: 'rgba(75, 75, 192, 1)',
+                            backgroundColor: 'rgba(75, 75, 192, 0.2)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Zeitpunkt der Messung'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Leistung (W)'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Funktion nach dem Laden der Seite aufrufen
+        fetchCSV();
+
+        // Seite automatisch jede Minute aktualisieren
+        setInterval(() => {
+            location.reload();
+        }, 60000); // 60000 ms = 1 Minute
+    </script>
+</body>
+</html>
+
